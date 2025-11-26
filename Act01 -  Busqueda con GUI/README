@@ -4,8 +4,3 @@ Estructura de la carpeta
 └── README.md # Este archivo
 └── requirements.txt #Las librerias instaladas
 
-Comparación de Búsqueda Lineal y Binaria
-
-Este proyecto es una aplicación en Python con Tkinter que permite comparar el rendimiento de los algoritmos de búsqueda lineal y búsqueda binaria
-sobre listas de números enteros generados aleatoriamente. La aplicación muestra el tiempo de ejecución de cada algoritmo y permite visualizar los
-resultados en una gráfica
