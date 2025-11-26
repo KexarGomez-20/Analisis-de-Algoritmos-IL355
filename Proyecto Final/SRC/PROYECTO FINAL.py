@@ -1,12 +1,8 @@
 """
-cracking_gui_with_random_and_mst.py
-
 Versión mejorada de la GUI:
  - Generar contraseña aleatoria (solo muestra hash)
  - Muestra complejidades teóricas y empíricas
  - Dibuja MST (PRIM) en una ventana con tkinter.Canvas (sin librerías externas)
-
-Uso: python cracking_gui_with_random_and_mst.py
 """
 
 import tkinter as tk
@@ -21,17 +17,13 @@ import random
 from collections import Counter, deque
 from typing import Optional, Tuple, List, Dict, Generator, Set
 
-# -------------------------
-# Config defaults
-# -------------------------
+#Configuraciones por defecto
 WORDLIST_PATH = "wordlist.txt"
 DEFAULT_ALPHABET = "abcdefghijklmnopqrstuvwxyz0123456789"
 DEFAULT_MAX_LEN = 4
 DEFAULT_HASH = "sha256"
 
-# -------------------------
-# Helpers
-# -------------------------
+#Funciones auxiliares
 def hash_text(text: str, algo: str = "sha256") -> str:
     h = hashlib.new(algo)
     h.update(text.encode('utf-8'))
@@ -63,9 +55,7 @@ def levenshtein(a: str, b: str) -> int:
         prev, cur = cur, prev
     return prev[lb]
 
-# -------------------------
-# Attack methods (same que antes)
-# -------------------------
+#Metodos de ataque
 def attack_bruteforce(target_hash: str, alphabet: str, max_len: int, algo: str,
                       progress_callback=None, stop_flag: threading.Event=None,
                       candidate_limit: Optional[int]=None) -> Tuple[Optional[str], float, int]:
@@ -98,7 +88,8 @@ def dyv_generate_of_length(alphabet: str, length: int) -> List[str]:
         for b in right:
             result.append(a + b)
     return result
-
+ 
+#Divide y Venceras
 def attack_dyv(target_hash: str, alphabet: str, max_len: int, algo: str,
                progress_callback=None, stop_flag: threading.Event=None,
                candidate_limit: Optional[int]=None) -> Tuple[Optional[str], float, int]:
@@ -148,7 +139,8 @@ def generate_edits_bfs(seed: str, alphabet: str, max_edits: int) -> Generator[st
                 if ns not in seen:
                     seen.add(ns)
                     dq.append((ns, d+1))
-
+                 
+#Programación dinamica 
 def attack_prog_dinamica_edits(target_hash: str, wordlist_path: str, alphabet: str, max_edits: int,
                                algo: str, progress_callback=None, stop_flag: threading.Event=None,
                                per_seed_limit: Optional[int]=None, global_limit: Optional[int]=None) -> Tuple[Optional[str], float, int]:
@@ -178,7 +170,7 @@ def attack_prog_dinamica_edits(target_hash: str, wordlist_path: str, alphabet: s
                 return cand, time.perf_counter() - start, checks
     return None, time.perf_counter() - start, checks
 
-# Voraz (Prim)
+#Voraz (Prim)
 def build_knn_graph(words: List[str], k: int = 8) -> Dict[int, List[Tuple[int, int]]]:
     n = len(words)
     adj = {i: [] for i in range(n)}
@@ -285,9 +277,7 @@ def attack_voraz_prim(target_hash: str, wordlist_path: str, k_neighbors: int, st
             return w, time.perf_counter() - start, checks
     return None, time.perf_counter() - start, checks
 
-# -------------------------
 # MST visual (tkinter Canvas)
-# -------------------------
 def compute_mst_for_visual(wordlist_path: str, k_neighbors: int = 6, top_n: int = 200):
     words = load_wordlist(wordlist_path)
     if not words:
@@ -375,12 +365,12 @@ def show_mst_canvas(words_subset: List[str], mst_edges: List[Tuple[int,int,float
     canvas = tk.Canvas(win, width=W, height=H, bg="white")
     canvas.pack(fill="both", expand=True)
     node_radius = 14
-    # draw edges
+    #draw edges
     for u, v, w in mst_edges:
         x1, y1 = positions[u]
         x2, y2 = positions[v]
         canvas.create_line(x1, y1, x2, y2, fill="#999", width=1)
-    # draw nodes
+    #draw nodes
     node_items = {}
     for i, w in enumerate(words_subset):
         x, y = positions[i]
@@ -395,16 +385,14 @@ def show_mst_canvas(words_subset: List[str], mst_edges: List[Tuple[int,int,float
             return on_click
         canvas.tag_bind(item, "<Button-1>", make_onclick(i))
         canvas.tag_bind(text_item, "<Button-1>", make_onclick(i))
-    # legend
+    #legend
     canvas.create_rectangle(10, 10, 220, 60, fill="#f8f8f8", outline="#ccc")
     canvas.create_oval(20-8, 25-8, 20+8, 25+8, fill="#66c2a5")
     canvas.create_text(45, 25, anchor="w", text="Start nodes (top freq)", font=("Arial", 9))
     canvas.create_oval(20-8, 45-8, 20+8, 45+8, fill="#8da0cb")
     canvas.create_text(45, 45, anchor="w", text="Other nodes", font=("Arial", 9))
 
-# -------------------------
-# GUI
-# -------------------------
+#GUI
 class CrackerGUI:
     def __init__(self, root):
         self.root = root
@@ -474,7 +462,7 @@ class CrackerGUI:
         ttk.Label(main, text="Candidate limit (global, 0 = no limit):").grid(row=8, column=0, sticky="w")
         self.limit_entry = ttk.Entry(main, width=12); self.limit_entry.insert(0, "0"); self.limit_entry.grid(row=8, column=1, sticky="w")
 
-        # random password generator controls
+        #Genetador de contraseñas aleatorias
         ttk.Label(main, text="Random pwd len:").grid(row=8, column=2, sticky="w")
         self.random_len_spin = tk.Spinbox(main, from_=3, to=12, width=5)
         self.random_len_spin.delete(0, "end"); self.random_len_spin.insert(0, "6")
@@ -597,16 +585,16 @@ class CrackerGUI:
                 t_total = time.perf_counter() - t0
                 if found:
                     self.append_output(f"[RESULT] Found password: {found}  (method={method}) time={elapsed:.4f}s checks={checks}")
-                    # si la contraseña fue generada aleatoriamente, revelar (opcional)
+                    #si la contraseña fue generada aleatoriamente, revelar (opcional)
                     if self._secret_plain:
                         if found == self._secret_plain:
                             self.append_output(f"[INFO] Coincide con contraseña generada (hidden).")
                 else:
                     self.append_output(f"[RESULT] No encontrado (method={method}) time={elapsed:.4f}s checks={checks}")
-                # mostrar estadísticas y complejidad teórica/empírica
+                #mostrar estadísticas y complejidad teórica/empírica
                 time_per_candidate = (elapsed / checks) if checks > 0 else float('inf')
                 self.append_output(f"[STATS] Time total: {t_total:.4f}s | Algorithm time: {elapsed:.4f}s | Checks: {checks} | Time/check: {time_per_candidate:.6e}s")
-                # complejidad teórica
+                #complejidad teórica
                 if method == "FB":
                     t_theory = "O(k^n)"; s_theory = "O(1) (o O(n) para candidato)"
                 elif method == "DyV":
@@ -633,10 +621,9 @@ class CrackerGUI:
                 self.stop_btn.config(state="disabled"); self.start_btn.config(state="normal"); self.stop_flag.clear()
         self.thread = threading.Thread(target=worker, daemon=True); self.thread.start()
 
-# -------------------------
 # Run GUI
-# -------------------------
 if __name__ == "__main__":
     root = tk.Tk()
     app = CrackerGUI(root)
     root.mainloop()
+
