@@ -370,7 +370,7 @@ def show_mst_canvas(words_subset: List[str], mst_edges: List[Tuple[int,int,float
         x1, y1 = positions[u]
         x2, y2 = positions[v]
         canvas.create_line(x1, y1, x2, y2, fill="#999", width=1)
-    #draw nodes
+    #Proceso de creación de nodos
     node_items = {}
     for i, w in enumerate(words_subset):
         x, y = positions[i]
@@ -378,14 +378,14 @@ def show_mst_canvas(words_subset: List[str], mst_edges: List[Tuple[int,int,float
         item = canvas.create_oval(x-node_radius, y-node_radius, x+node_radius, y+node_radius, fill=color, outline="#333")
         text_item = canvas.create_text(x, y, text=str(i), fill="white", font=("Arial", 9))
         node_items[item] = i
-        # attach tag for click
+        #Adjunta etiqueta para hacer click
         def make_onclick(idx):
             def on_click(event):
                 messagebox.showinfo("Node info", f"Index: {idx}\nWord: {words_subset[idx]}")
             return on_click
         canvas.tag_bind(item, "<Button-1>", make_onclick(i))
         canvas.tag_bind(text_item, "<Button-1>", make_onclick(i))
-    #legend
+    #leyende
     canvas.create_rectangle(10, 10, 220, 60, fill="#f8f8f8", outline="#ccc")
     canvas.create_oval(20-8, 25-8, 20+8, 25+8, fill="#66c2a5")
     canvas.create_text(45, 25, anchor="w", text="Start nodes (top freq)", font=("Arial", 9))
@@ -626,4 +626,5 @@ if __name__ == "__main__":
     root = tk.Tk()
     app = CrackerGUI(root)
     root.mainloop()
+
 
