@@ -1,6 +1,0 @@
-Estructura de la carpeta
-
-├── main.py   # Código principal con la interfaz y los algoritmos
-└── README.md # Este archivo
-└── requirements.txt #Las librerias instaladas
-
